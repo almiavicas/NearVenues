@@ -1,4 +1,4 @@
-package com.example.android.nearvenues;
+package com.example.android.nearvenues.utils;
 
 public class Utils {
 

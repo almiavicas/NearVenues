@@ -1,4 +1,6 @@
-package com.example.android.nearvenues;
+package com.example.android.nearvenues.API.APIServices;
+
+import com.example.android.nearvenues.models.Venue;
 
 import java.util.List;
 
