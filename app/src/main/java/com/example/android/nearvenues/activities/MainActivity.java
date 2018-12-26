@@ -23,13 +23,14 @@ import com.example.android.nearvenues.models.Venue;
 import com.example.android.nearvenues.utils.Utils;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Button searchButton;
 
@@ -40,7 +41,6 @@ public class MainActivity extends AppCompatActivity {
     private FoursquareService service;
     private List<Venue> results;
     private LocationManager locationManager;
-    private Location lastLocation;
 
     private final int REQUEST_PERMISSION = 1;
 
@@ -48,68 +48,31 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        service = API.getApi().create(FoursquareService.class);
+        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         bindUI();
     }
 
     private void bindUI() {
         searchButton = findViewById(R.id.button);
         recyclerView = findViewById(R.id.recyclerView);
-        recyclerView.setHasFixedSize(true);
+        results = new ArrayList<>();
         adapter = new MyAdapter(R.layout.item_layout, results);
         layoutManager = new LinearLayoutManager(this);
-        service = API.getApi().create(FoursquareService.class);
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        searchButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
-                    return;
-                }
-                lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                callFourSquareService(lastLocation);
-
-            }
-
-        });
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setHasFixedSize(true);
+        searchButton.setOnClickListener(this);
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case REQUEST_PERMISSION:
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                        return;
-                    }
-                    lastLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                    callFourSquareService(lastLocation);
-                }
-                else {
-                    Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-                break;
-        }
-    }
 
     private void callFourSquareService(Location lastLocation) {
 
-        DecimalFormat format = new DecimalFormat("#.##");
-        String latLon = format.format(lastLocation.getLatitude()) + "," + format.format(lastLocation.getLongitude());
         Call<List<Venue>> venues = service.listVenues(
-                latLon,
-                Utils.FOURSQUARE_CLIENT_KEY,
-                Utils.FOURSQUARE_CLIENT_SECRET);
+                Utils.getLatLon(lastLocation),
+                API.FOURSQUARE_CLIENT_KEY,
+                API.FOURSQUARE_CLIENT_SECRET,
+                API.getVersion());
 
         venues.enqueue(new Callback<List<Venue>>() {
             @Override
@@ -123,5 +86,35 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(MainActivity.this, "error", Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onClick(View view) {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
+            return;
+        }
+        callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case REQUEST_PERMISSION:
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        return;
+                    }
+                    callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+                }
+                else {
+                    Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+                break;
+        }
     }
 }
