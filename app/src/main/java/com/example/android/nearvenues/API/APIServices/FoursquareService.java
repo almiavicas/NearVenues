@@ -13,5 +13,6 @@ public interface FoursquareService {
     Call<List<Venue>> listVenues(
             @Query("ll") String latLon,
             @Query("client_id") String clientId,
-            @Query("client_secret") String secretKey);
+            @Query("client_secret") String secretKey,
+            @Query("v") String version);
 }
