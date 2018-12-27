@@ -10,6 +10,7 @@ import android.widget.TextView;
 import com.example.android.nearvenues.R;
 import com.example.android.nearvenues.models.Venue;
 
+import java.text.DecimalFormat;
 import java.util.List;
 
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
@@ -55,7 +56,8 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
         void bind(final Venue venue) {
             this.name.setText(venue.getName());
             this.address.setText(venue.getAddress());
-            this.distance.setText(venue.getDistance());
+            DecimalFormat format = new DecimalFormat("#.#");
+            this.distance.setText(format.format(venue.getDistance()) + "m");
         }
     }
 }

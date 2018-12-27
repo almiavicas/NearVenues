@@ -56,10 +56,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void bindUI() {
         searchButton = findViewById(R.id.button);
         recyclerView = findViewById(R.id.recyclerView);
-        results = new ArrayList<>();
-        adapter = new MyAdapter(R.layout.item_layout, results);
         layoutManager = new LinearLayoutManager(this);
-        recyclerView.setAdapter(adapter);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setHasFixedSize(true);
         searchButton.setOnClickListener(this);
@@ -78,7 +75,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onResponse(Call<List<Venue>> call, Response<List<Venue>> response) {
                 results = response.body();
-                adapter.notifyDataSetChanged();
+                adapter = new MyAdapter(R.layout.item_layout, results);
+                recyclerView.setAdapter(adapter);
             }
 
             @Override
