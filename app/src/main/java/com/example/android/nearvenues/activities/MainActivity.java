@@ -71,11 +71,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
             return;
         }
-        callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+        if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+            callFourSquareService(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+        }
+        else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+            callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+        } else {
+            Toast.makeText(this, "No location provider found", Toast.LENGTH_LONG).show();
+        }
     }
 
     /** Makes the call to the FourSquare API and loads it into the adapter */
@@ -107,10 +114,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch (requestCode) {
             case REQUEST_PERMISSION:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                         return;
                     }
-                    callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+                    if (locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)) {
+                        callFourSquareService(locationManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER));
+                    } else if (locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+                    } else {
+                        Toast.makeText(this, "No location provider found", Toast.LENGTH_LONG).show();
+                    }
+
                 }
                 else {
                     Toast.makeText(this, "Permission not granted", Toast.LENGTH_SHORT).show();
