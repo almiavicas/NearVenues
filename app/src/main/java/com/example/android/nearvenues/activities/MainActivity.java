@@ -32,16 +32,22 @@ import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    /* Layout resources */
     private Button searchButton;
-
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
 
+    /* API call resources */
+    /** {@link com.example.android.nearvenues.API.APIServices.FoursquareService} used to manage
+     * API calls
+     */
     private FoursquareService service;
+    /** List of {@link com.example.android.nearvenues.models.Venue} objects to display */
     private List<Venue> results;
+    /** LocationManager used to retrieve user last location */
     private LocationManager locationManager;
-
+    /** Permission code for requesting GPS location provider */
     private final int REQUEST_PERMISSION = 1;
 
     @Override
@@ -53,6 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bindUI();
     }
 
+    /** Binds UI elements with activity's elements */
     private void bindUI() {
         searchButton = findViewById(R.id.button);
         recyclerView = findViewById(R.id.recyclerView);
@@ -62,7 +69,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         searchButton.setOnClickListener(this);
     }
 
+    @Override
+    public void onClick(View view) {
+        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
+            return;
+        }
+        callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
+    }
 
+    /** Makes the call to the FourSquare API and loads it into the adapter */
     private void callFourSquareService(Location lastLocation) {
 
         Call<List<Venue>> venues = service.listVenues(
@@ -85,16 +101,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
     }
-
-    @Override
-    public void onClick(View view) {
-        if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, REQUEST_PERMISSION);
-            return;
-        }
-        callFourSquareService(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
-    }
-
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {

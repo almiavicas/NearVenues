@@ -14,6 +14,7 @@ import java.util.List;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
+/** Contains all elements to establish connection with FourSquare service */
 public class API {
 
     private static final String BASE_URL = "https://api.foursquare.com/";
@@ -38,6 +39,7 @@ public class API {
         return retrofit;
     }
 
+    /** Param needed to make the API get call */
     public static String getVersion() {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
         return format.format(Calendar.getInstance().getTime());

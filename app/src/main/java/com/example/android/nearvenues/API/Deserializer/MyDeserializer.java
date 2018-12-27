@@ -15,6 +15,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+/** Class to deserialize the JSON obtained from the FourSquare service.
+ * Extracts the list of venues in JSON
+ */
 public class MyDeserializer implements JsonDeserializer<List<Venue>> {
 
     @Override

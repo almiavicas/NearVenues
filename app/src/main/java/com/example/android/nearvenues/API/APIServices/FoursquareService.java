@@ -8,7 +8,10 @@ import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 
+/** Interface to define the calls made to FourSquare service */
 public interface FoursquareService {
+
+    /** method to retrieve list of near venues */
     @GET("v2/venues/search")
     Call<List<Venue>> listVenues(
             @Query("ll") String latLon,

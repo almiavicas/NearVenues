@@ -13,6 +13,7 @@ import com.example.android.nearvenues.models.Venue;
 import java.text.DecimalFormat;
 import java.util.List;
 
+/** Adapter class for main {@link android.support.v7.widget.RecyclerView} */
 public class MyAdapter extends RecyclerView.Adapter<MyAdapter.MyViewHolder> {
 
     private List<Venue> venues;
